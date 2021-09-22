@@ -108,7 +108,7 @@ char *argv[];
   }
   EncodeSymbol (&Tree, END_OF_STREAM, output );
   while ( argc-- > 0 ) {
-    printf( "Unused argument:  %s\n", *argv ); argv++;
+    printf( "\nUnused argument:   %s", *argv ); argv++;
   } 
 }
 

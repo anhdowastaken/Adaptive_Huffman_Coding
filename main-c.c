@@ -64,6 +64,8 @@ char *argv[];
   CompressFile( input, output, argc, argv );
   CloseOutputBitFile( output );
   fclose( input );
+  argc += 3;
+  argv -= 3;
   print_ratios( argv[ 1 ], argv[ 2 ] );
   return( 0 );
 }
@@ -112,7 +114,7 @@ char *name;
 {
   long eof_ftell;
   FILE *file;
-  file = fopen( name, "r");
+  file = fopen( name, "rb");
   if ( file == NULL )
     return( 0L );
   fseek( file, 0L , SEEK_END );
@@ -137,10 +139,11 @@ char *output;
     input_size = 1;
   output_size = file_size( output );
   ratio = 100 - (int) ( output_size * 100L / input_size );
-  printf( "\nInput bytes:        %ld\n", input_size );
-  printf( "Output bytes:      %ld/n", output_size );
+  printf( "\n");
+  printf( "Input bytes:       %ld\n", input_size );
+  printf( "Output bytes:      %ld\n", output_size );
   if ( output_size == 0 )
     output_size = 1;
-  printf( "Compression ratio:  %d%%\n", ratio );
+  printf( "Compression ratio: %d%%\n", ratio );
 }
 /*********************** End of MAIN-C.C *************************/

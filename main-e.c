@@ -56,7 +56,7 @@ char *prog_name;
   char *extension;
   short_name = strrchr( prog_name, '\\' );
   if ( short_name == NULL )
-    short_name == strrchr( prog_name, '/' );
+    short_name = strrchr( prog_name, '/' );
   if ( short_name == NULL )
     short_name = strrchr( prog_name, ':' );
   if ( short_name != NULL )
