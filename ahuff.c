@@ -156,23 +156,13 @@ void InitializeTree( tree )
 TREE *tree;
 {
   int i;
-  tree->nodes[ ROOT_NODE ].child = ROOT_NODE + 1;
-  tree->nodes[ ROOT_NODE ].child_is_leaf = FALSE;
-  tree->nodes[ ROOT_NODE ].weight = 2;
+  tree->nodes[ ROOT_NODE ].child = ESCAPE;
+  tree->nodes[ ROOT_NODE ].child_is_leaf = TRUE;
+  tree->nodes[ ROOT_NODE ].weight = 1;
   tree->nodes[ ROOT_NODE ].parent = -1;
+  tree->leaf[ ESCAPE ] = ROOT_NODE;
 
-  tree->nodes[ ROOT_NODE + 1 ].child = END_OF_STREAM;
-  tree->nodes[ ROOT_NODE + 1 ].child_is_leaf = TRUE;
-  tree->nodes[ ROOT_NODE + 1 ].weight = 1;
-  tree->nodes[ ROOT_NODE + 1 ].parent = ROOT_NODE;
-  tree->leaf[ END_OF_STREAM ] = ROOT_NODE + 1;
-
-  tree->nodes[ ROOT_NODE + 2 ].child = ESCAPE;
-  tree->nodes[ ROOT_NODE + 2 ].child_is_leaf = TRUE;
-  tree->nodes[ ROOT_NODE + 2 ].weight = 1;
-  tree->nodes[ ROOT_NODE + 2 ].parent = ROOT_NODE;
-  tree->leaf[ ESCAPE ] = ROOT_NODE + 2;
-  tree->next_free_node = ROOT_NODE + 3;
+  tree->next_free_node = ROOT_NODE + 1;
 
   for ( i = 0 ; i < END_OF_STREAM ; i++ )
     tree->leaf[ i ] = -1;
@@ -208,8 +198,8 @@ BIT_FILE *output;
     current_node = tree->leaf[ ESCAPE ];
 
   while ( current_node != ROOT_NODE ) {
-    if ( ( current_node & 1 ) == 0 )
-      code |= current_bit;
+    if (current_node % 2 == 1)
+      code |= current_bit;;
     current_bit <<= 1;
     code_size++;
     current_node = tree->nodes[ current_node ].parent;
@@ -217,7 +207,7 @@ BIT_FILE *output;
 
   OutputBits( output, code, code_size );
   if ( tree->leaf[ c ] == -1 ) {
-    OutputBits( output, (unsigned long) c, 8 );
+    OutputBits( output, (unsigned long) c, 7 );
     add_new_node( tree, c );
   }
 }
@@ -237,15 +227,20 @@ BIT_FILE *input;
 {
   int current_node;
   int c;
+  int current_bit;
   current_node = ROOT_NODE;
 
   while ( !tree->nodes[ current_node ].child_is_leaf ) {
-    current_node = tree->nodes[ current_node ].child;
-    current_node += InputBit( input );
+    current_bit = InputBit( input );
+    if (current_bit == 1) {
+        current_node = tree->nodes[ current_node ].child;
+    } else {
+        current_node = tree->nodes[ current_node ].child + 1;
+    }
   }
   c = tree->nodes[ current_node ].child;
   if ( c == ESCAPE ) {
-    c = (int) InputBits( input, 8 );
+    c = (int) InputBits( input, 7 );
     add_new_node( tree, c );
   }
   return( c );

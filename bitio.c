@@ -78,6 +78,11 @@ unsigned long code;
 int count;
 {
   unsigned long mask;
+
+  if (count == 0) {
+    return;
+  }
+
   mask = 1L << ( count - 1 );
   while ( mask != 0) {
     if ( mask & code )
@@ -119,6 +124,10 @@ int bit_count;
 {
   unsigned long mask;
   unsigned long return_value;
+
+  if (bit_count == 0) {
+    fatal_error( "InputBits with bit_count=0!\n" );
+  }
 
   mask = 1L << ( bit_count - 1 );
   return_value = 0;
