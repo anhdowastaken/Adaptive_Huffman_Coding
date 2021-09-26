@@ -168,8 +168,8 @@ function Tree:UpdateModel(c)
 	local current_node;
 	local new_node;
 
-	if self.nodes[ ROOT_NODE].weight == MAX_WEIGHT then
-		self.Rebuild();
+	if self.nodes[ ROOT_NODE].weight >= MAX_WEIGHT then
+		self:Rebuild();
 	end
 
 	current_node = self.leaf[ c ];
@@ -209,13 +209,14 @@ function Tree:Rebuild()
 	-- Huffman tree and put them in the end of the tree.  While I am doing
 	-- that, I scale the counts down by a factor of 2.
 	j = self.next_free_node - 1;
-	for i = j, ROOT_NODE, -1 do
+	i = j
+	while i >= ROOT_NODE do
 		if self.nodes[ i ].child_is_leaf == TRUE then
-			-- FIXME: This is reference
-			self.nodes[ j ] = self.nodes[ i ];
-			self.nodes[ j ].weight = ( self.nodes[ j ].weight + 1 ) / 2;
-			j = j - 1 
+			CopyNodeByValue(self.nodes[i], self.nodes[j])
+			self.nodes[ j ].weight = math.floor((self.nodes[ j ].weight + 1 ) / 2);
+			j = j - 1
 		end
+		i = i - 1
 	end
 
 	-- At this point, j points to the first free node.  I now have all the
@@ -239,8 +240,18 @@ function Tree:Rebuild()
 		end
 		k = k - 1
 
-		-- FIXME
-		-- memmove( &self.nodes[ j ], &self.nodes[ j + 1 ], ( k - j ) * sizeof( struct node ) );
+		local tmp = {}
+		for m = 0, (k - j) - 1 do
+			tmp[m] = Node:new()
+		end
+		-- Copy src to tmp
+		for m = j + 1, k do
+			CopyNodeByValue(self.nodes[m], tmp[m - (j + 1)])
+		end
+		-- Copy tmp to dest
+		for m = j, k - 1 do
+			CopyNodeByValue(tmp[m - j], self.nodes[m])
+		end
 
 		self.nodes[ k ].weight = weight;
 		self.nodes[ k ].child = i;
@@ -253,7 +264,8 @@ function Tree:Rebuild()
 	-- The final step in tree reconstruction is to go through and set up
 	-- all of the leaf and parent members.  This can be safely done now
 	-- that every node is in its final position in the tree.
-	for i = self.next_free_node - 1, ROOT_NODE, -1 do
+	i = self.next_free_node - 1
+	while i >= ROOT_NODE do
 		if self.nodes[ i ].child_is_leaf == TRUE then
 			k = self.nodes[ i ].child;
 			self.leaf[ k ] = i;
@@ -262,6 +274,7 @@ function Tree:Rebuild()
 			self.nodes[ k ].parent = i;
 			self.nodes[ k + 1 ].parent = i;
 		end
+		i = i - 1
 	end
 end
 

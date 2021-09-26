@@ -262,7 +262,7 @@ int c;
   int current_node;
   int new_node;
 
-  if ( tree->nodes[ ROOT_NODE].weight == MAX_WEIGHT )
+  if ( tree->nodes[ ROOT_NODE].weight >= MAX_WEIGHT )
     RebuildTree( tree );
   current_node = tree->leaf[ c ];
   while ( current_node != -1 ) {
